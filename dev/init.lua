@@ -1,6 +1,7 @@
 -- force lua to import the modules again
 package.loaded['dev'] = nil
 package.loaded['sshfs'] = nil
+package.loaded['sshfs.window'] = nil
 package.loaded['test'] = nil
 -- package.loaded['greetings.awesome-module'] = nil
 
