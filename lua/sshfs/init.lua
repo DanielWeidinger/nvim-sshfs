@@ -1,14 +1,7 @@
+local utils = require('sshfs.utils')
 local windows = require('sshfs.window')
 local win, host_count, hosts_map
 local top_offset = 4
-
-local function formatted_lines(entries)
-    -- TODO: baseline hostnames
-    local str_entries = vim.fn.map(entries, function (i, e)
-        return "["..i.."] "..e["hostname"].." --> "..e["text"]
-    end)
-    return str_entries
-end
 
 local function set_mappings(buf)
   local mappings = {
@@ -37,49 +30,28 @@ local function close_window()
 end
 
 local function open_host()
-    local row = vim.api.nvim_win_get_cursor(win)[2]-1
-    print(row)
+    local row = vim.api.nvim_win_get_cursor(win)[1]+1
     local idx = row - top_offset
-    print(vim.fn.join(hosts_map, "\n"))
     local host = hosts_map[idx]
     print(host)
 end
 
-local function set_hosts(buf, hosts)
-    vim.api.nvim_buf_set_option(buf, 'modifiable', true)
-
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {
-        windows.center("Hosts"),
-        windows.center("-----"),
-        windows.center("")
-    })
-    vim.api.nvim_buf_set_lines(buf, top_offset, -1, false, formatted_lines(hosts))
-
-    vim.api.nvim_buf_set_option(buf, 'modifiable', false)
-end
 
 local function open_hosts()
-    local getAllHostCmd = "sed '/^$/d;s/Host //' $HOME/.ssh/config | sed -z 's/\\n\\s* /;/g'"
+    local getAllHostCmd = "cat $HOME/.ssh/config"
     local hosts = vim.fn.systemlist(getAllHostCmd)
-    hosts_map = vim.fn.map(hosts, function (_, host)
-        local entries = vim.fn.split(host, ';')
 
-        local hostname = vim.fn.remove(entries, 0)
-        local desc = vim.fn.join(entries, " ")
-
-        return {hostname=hostname, text=desc}
-    end)
+    hosts_map = utils.parse_config(hosts)
     host_count = vim.fn.count(hosts_map, '.*')
 
     local buf, _win = windows.open_window()
     win = _win
     vim.api.nvim_buf_set_option(buf, "modifiable", false)
-    set_hosts(buf, hosts_map)
+    windows.set_header(buf, "Hosts")
+    vim.api.nvim_buf_set_lines(buf, top_offset, -1, false, utils.formatted_lines(hosts_map))
+
     vim.api.nvim_win_set_cursor(win, {4, 1})
     set_mappings(buf)
-
-    -- vim.fn.setqflist(hosts_map, "r")
-    -- vim.fn.execute("copen")
 end
 
 return {

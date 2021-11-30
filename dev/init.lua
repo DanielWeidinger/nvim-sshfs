@@ -2,8 +2,8 @@
 package.loaded['dev'] = nil
 package.loaded['sshfs'] = nil
 package.loaded['sshfs.window'] = nil
-package.loaded['test'] = nil
--- package.loaded['greetings.awesome-module'] = nil
+package.loaded['sshfs.utils'] = nil
+
 
 -- [ , + r ] keymap to reload the lua file
 -- NOTE: someone need to source this file to apply these configurations. So, the

@@ -6,6 +6,18 @@ local function center(str)
   return string.rep(' ', shift) .. str
 end
 
+local function set_header(buf, header)
+    vim.api.nvim_buf_set_option(buf, 'modifiable', true)
+
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {
+        center(header),
+        center("----------"), -- TODO: make header len
+        center("")
+    })
+
+    vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+end
+
 local function open_window()
     -- get dimensions
     local width = vim.api.nvim_get_option("columns")
@@ -62,5 +74,6 @@ end
 
 return {
     open_window = open_window,
-    center = center
+    center = center,
+    set_header = set_header
 }
