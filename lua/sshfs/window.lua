@@ -18,6 +18,13 @@ local function set_header(buf, header)
     vim.api.nvim_buf_set_option(buf, 'modifiable', false)
 end
 
+local function set_content(buf, top_offset, content)
+    vim.api.nvim_buf_set_option(buf, 'modifiable', true)
+    print(content)
+    vim.api.nvim_buf_set_lines(buf, top_offset, -1, false, content)
+    vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+end
+
 local function open_window()
     -- get dimensions
     local width = vim.api.nvim_get_option("columns")
@@ -75,5 +82,6 @@ end
 return {
     open_window = open_window,
     center = center,
-    set_header = set_header
+    set_header = set_header,
+    set_content = set_content
 }

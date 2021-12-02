@@ -1,62 +1,79 @@
-local utils = require('sshfs.utils')
-local windows = require('sshfs.window')
+local utils = require("sshfs.utils")
+local windows = require("sshfs.window")
 local win, host_count, hosts_map
 local top_offset = 4
+local dflt_mnt_basedir = vim.fn.expand("$HOME") .. "/Desktop"
 
 local function set_mappings(buf)
-  local mappings = {
-    ['<cr>'] = 'open_host()',
-    j = 'move_cursor(-1)',
-    h = 'move_cursor(-1)',
-    k = 'move_cursor(1)',
-    l = 'move_cursor(1)',
-    q = 'close_window()',
-  }
+	local mappings = {
+		["<cr>"] = "open_host()",
+		j = "move_cursor(-1)",
+		h = "move_cursor(-1)",
+		k = "move_cursor(1)",
+		l = "move_cursor(1)",
+		q = "close_window()",
+	}
 
-  for k,v in pairs(mappings) do
-    vim.api.nvim_buf_set_keymap(buf, 'n', k, ':lua require"sshfs".'..v..'<cr>', {
-        nowait = true, noremap = true, silent = true
-      })
-  end
+	for k, v in pairs(mappings) do
+		vim.api.nvim_buf_set_keymap(buf, "n", k, ':lua require"sshfs".' .. v .. "<cr>", {
+			nowait = true,
+			noremap = true,
+			silent = true,
+		})
+	end
 end
 
 local function move_cursor(direction)
-    local new_pos = math.max(top_offset + host_count, vim.api.nvim_win_get_cursor(win)[1] - direction)
-    vim.api.nvim_win_set_cursor(win, {new_pos, 1})
+	local new_pos = math.max(top_offset + host_count, vim.api.nvim_win_get_cursor(win)[1] - direction)
+	vim.api.nvim_win_set_cursor(win, { new_pos, 1 })
 end
 
 local function close_window()
-  vim.api.nvim_win_close(win, true)
+	vim.api.nvim_win_close(win, true)
 end
 
 local function open_host()
-    local row = vim.api.nvim_win_get_cursor(win)[1]+1
-    local idx = row - top_offset
-    local host = hosts_map[idx]
-    print(host)
+	local row = vim.api.nvim_win_get_cursor(win)[1] + 1
+	local idx = row - top_offset
+	local host = hosts_map[idx]
+	local mnt_dir = dflt_mnt_basedir .. "/" .. host["host"]
+	local cmd = utils.construct_sshfs_cmd(host["host"], mnt_dir)
+	local passwd = vim.fn.input("Password for " .. host["host"] .. ": \n")
+
+	local res = vim.fn.system(cmd, passwd)
+	if res == "" then
+		print("Successfully connected!")
+		local cwd_choice = vim.fn.input("Do you want to switch you cwd[Y/n]?")
+		if cwd_choice == "" or cwd_choice == "Y" or cwd_choice == "y" then
+			vim.fn.chdir(mnt_dir)
+			if vim.fn.executable(":NERDtreeCWD") then
+				vim.api.nvim_command(":NERDtreeCWD")
+			end
+		end
+	else
+		print(res)
+	end
 end
 
-
 local function open_hosts()
-    local getAllHostCmd = "cat $HOME/.ssh/config"
-    local hosts = vim.fn.systemlist(getAllHostCmd)
+	local getAllHostCmd = "cat $HOME/.ssh/config"
+	local hosts = vim.fn.systemlist(getAllHostCmd)
 
-    hosts_map = utils.parse_config(hosts)
-    host_count = vim.fn.count(hosts_map, '.*')
+	hosts_map = utils.parse_config(hosts)
+	host_count = vim.fn.count(hosts_map, ".*")
 
-    local buf, _win = windows.open_window()
-    win = _win
-    vim.api.nvim_buf_set_option(buf, "modifiable", false)
-    windows.set_header(buf, "Hosts")
-    vim.api.nvim_buf_set_lines(buf, top_offset, -1, false, utils.formatted_lines(hosts_map))
-
-    vim.api.nvim_win_set_cursor(win, {4, 1})
-    set_mappings(buf)
+	local buf, _win = windows.open_window()
+	win = _win
+	vim.api.nvim_buf_set_option(buf, "modifiable", false)
+	windows.set_header(buf, "Hosts")
+	windows.set_content(buf, top_offset, utils.formatted_lines(hosts_map))
+	vim.api.nvim_win_set_cursor(win, { 4, 1 })
+	set_mappings(buf)
 end
 
 return {
-    open_hosts = open_hosts,
-    close_window = close_window,
-    move_cursor = move_cursor,
-    open_host = open_host
+	open_hosts = open_hosts,
+	close_window = close_window,
+	move_cursor = move_cursor,
+	open_host = open_host,
 }
