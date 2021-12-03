@@ -1,30 +1,13 @@
 local utils = require("sshfs.utils")
 local windows = require("sshfs.window")
+
 local win, host_count, hosts_map
 local top_offset = 4
 local dflt_mnt_basedir = vim.fn.expand("$HOME") .. "/Desktop"
 
-local function set_mappings(buf)
-	local mappings = {
-		["<cr>"] = "open_host()",
-		j = "move_cursor(-1)",
-		h = "move_cursor(-1)",
-		k = "move_cursor(1)",
-		l = "move_cursor(1)",
-		q = "close_window()",
-	}
-
-	for k, v in pairs(mappings) do
-		vim.api.nvim_buf_set_keymap(buf, "n", k, ':lua require"sshfs".' .. v .. "<cr>", {
-			nowait = true,
-			noremap = true,
-			silent = true,
-		})
-	end
-end
-
 local function move_cursor(direction)
-	local new_pos = math.max(top_offset + host_count, vim.api.nvim_win_get_cursor(win)[1] - direction)
+	local new_pos = math.max(top_offset, vim.api.nvim_win_get_cursor(win)[1] - direction) -- lower bound
+	new_pos = math.min(top_offset + host_count - 1, new_pos) -- upper bound
 	vim.api.nvim_win_set_cursor(win, { new_pos, 1 })
 end
 
@@ -72,9 +55,12 @@ end
 local function open_hosts()
 	local getAllHostCmd = "cat $HOME/.ssh/config"
 	local hosts = vim.fn.systemlist(getAllHostCmd)
+	local getAllConnectionsCmd = "mount -t fuse.sshfs"
+	local connections = vim.fn.systemlist(getAllConnectionsCmd)
 
-	hosts_map = utils.parse_config(hosts)
-	host_count = vim.fn.count(hosts_map, ".*")
+	local connections_map = utils.parse_connections(connections)
+	hosts_map = utils.parse_config(hosts, connections_map)
+	host_count = vim.fn.len(hosts_map)
 
 	local buf, _win = windows.open_window()
 	win = _win
@@ -82,7 +68,7 @@ local function open_hosts()
 	windows.set_header(buf, "Hosts")
 	windows.set_content(buf, top_offset, utils.formatted_lines(hosts_map))
 	vim.api.nvim_win_set_cursor(win, { 4, 1 })
-	set_mappings(buf)
+	windows.set_mappings(buf)
 end
 
 return {
