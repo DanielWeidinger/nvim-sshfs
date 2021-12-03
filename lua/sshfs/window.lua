@@ -11,7 +11,7 @@ M.set_header = function(buf, header)
 	vim.api.nvim_buf_set_option(buf, "modifiable", true)
 
 	local underline = ""
-	for i = 1, vim.fn.len(header) do
+	for _ = 1, vim.fn.len(header) do
 		underline = "-" .. underline
 	end
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, {

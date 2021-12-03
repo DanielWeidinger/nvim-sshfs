@@ -13,7 +13,7 @@ TODO: create config options
 - [x] fast connections to a remote host from within nvim
 - [x] ~/.ssh/config support
 - [x] check connection status of existing mounts
-- [ ] (re-)Connect to existing mounts
+- [x] (re-)Connect to existing mounts
 - [ ] Adding/Delete hosts in ~/.ssh/config
 - [x] NERDTree integration
 

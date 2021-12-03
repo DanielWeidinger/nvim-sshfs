@@ -20,35 +20,38 @@ local function open_host()
 	local idx = row - top_offset
 	local host = hosts_map[idx]
 	local mnt_dir = dflt_mnt_basedir .. "/" .. host["host"]
-	if vim.fn.isdirectory(mnt_dir) == 0 then
-		print(mnt_dir .. " does not exists.")
-		local cwd_choice = vim.fn.input("Should " .. mnt_dir .. " be created[Y/n]?\n")
+
+	if not host.connected then
+		if vim.fn.isdirectory(mnt_dir) == 0 then
+			print(mnt_dir .. " does not exists.")
+			local cwd_choice = vim.fn.input("Should " .. mnt_dir .. " be created[Y/n]?\n")
+			print("")
+			if cwd_choice == "" or cwd_choice == "Y" or cwd_choice == "y" then
+				vim.fn.mkdir(mnt_dir, "p")
+			else
+				return
+			end
+		end
+		local cmd = utils.construct_sshfs_cmd(host["host"], mnt_dir)
+		local passwd = vim.fn.input("Password for " .. host["host"] .. ": \n")
 		print("")
-		if cwd_choice == "" or cwd_choice == "Y" or cwd_choice == "y" then
-			vim.fn.mkdir(mnt_dir, "p")
-		else
+
+		local res = vim.fn.system(cmd, passwd)
+		if res ~= "" then
+			print(res)
 			return
 		end
 	end
-	local cmd = utils.construct_sshfs_cmd(host["host"], mnt_dir)
-	local passwd = vim.fn.input("Password for " .. host["host"] .. ": \n")
-	print("")
 
-	local res = vim.fn.system(cmd, passwd)
-	if res == "" then
-		print(vim.api.nvim_get_current_win())
-		vim.api.nvim_win_close(vim.api.nvim_get_current_win(), false)
-		print("Successfully connected!")
-		local cwd_choice = vim.fn.input("Do you want to switch you cwd[Y/n]?\n")
-		print("")
-		if cwd_choice == "" or cwd_choice == "Y" or cwd_choice == "y" then
-			vim.fn.chdir(mnt_dir)
-			if vim.fn.exists("NERDTree") == 1 then
-				vim.cmd("NERDTreeCWD")
-			end
+	vim.api.nvim_win_close(vim.api.nvim_get_current_win(), false)
+	print("Successfully " .. (host.connected and "re" or "") .. "connected!")
+	local cwd_choice = vim.fn.input("Do you want to switch you cwd[Y/n]?\n")
+	print("")
+	if cwd_choice == "" or cwd_choice == "Y" or cwd_choice == "y" then
+		vim.fn.chdir(mnt_dir)
+		if vim.fn.exists("NERDTree") == 1 then
+			vim.cmd("NERDTreeCWD")
 		end
-	else
-		print(res)
 	end
 end
 
