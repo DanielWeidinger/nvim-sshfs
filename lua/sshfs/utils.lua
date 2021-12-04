@@ -1,3 +1,5 @@
+local config = require("sshfs.config")
+
 local M = {}
 
 M.parse_config = function(config_lines, connections)
@@ -34,7 +36,14 @@ M.parse_config = function(config_lines, connections)
 				line = config_lines[i]
 			end
 
-			result[res_idx] = { host = host, hostname = hostname, user = user, connected = connections[host] or false }
+			local mnt_path = connections[host] or (config.options.mnt_base_dir .. "/" .. host)
+			result[res_idx] = {
+				host = host,
+				hostname = hostname,
+				user = user,
+				mnt_path = mnt_path,
+				connected = (connections[host] and true or false),
+			}
 			res_idx = res_idx + 1
 		end
 
@@ -45,14 +54,18 @@ end
 
 M.parse_connections = function(connection_lines)
 	local connection_pattern = "^([%w%.-_]+):/ on .*$"
+	local connection_path_pattern = "^[%w%.-_]+:/ on ([/%w%.-_%d]+) type .*$"
 
 	local results = {}
-	local res_idx = 1
 
 	for _, line in pairs(connection_lines) do
 		local matches = line:match(connection_pattern)
 		if matches then
-			results[matches] = true
+			local conn_path = line:match(connection_path_pattern)
+			if not conn_path then
+				error("Connection detected but no path. Regex is probably faulty")
+			end
+			results[matches] = conn_path
 		end
 	end
 
@@ -63,7 +76,7 @@ M.formatted_lines = function(entries, win)
 	-- TODO: baseline hostnames for windows
 	local width = vim.api.nvim_win_get_width(win)
 	local str_entries = vim.fn.map(entries, function(i, e)
-		local base = "[" .. i .. "] " .. e.host .. " --> " .. e.user .. "@" .. e.hostname
+		local base = "[" .. i .. "] " .. e.host .. ": " .. e.user .. "@" .. e.hostname .. " --> " .. e.mnt_path
 		local len = vim.fn.len(base)
 		local connected_string = " [" .. (e.connected and "x" or " ") .. "]"
 		local appendix = string.format("%-" .. (width - len - 4) .. "s", "")

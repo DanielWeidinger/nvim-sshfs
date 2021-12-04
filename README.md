@@ -14,7 +14,6 @@ TODO: create config options
 - [x] ~/.ssh/config support
 - [x] check connection status of existing mounts
 - [x] (re-)Connect to existing mounts
-- [ ] Adding/Delete hosts in ~/.ssh/config
 - [x] NERDTree integration
 
 

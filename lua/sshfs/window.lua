@@ -1,3 +1,5 @@
+local config = require("sshfs.config")
+
 local M = {}
 -- credit goes out to: https://www.2n.pl/blog/how-to-write-neovim-plugins-in-lua
 
@@ -35,8 +37,8 @@ M.open_window = function()
 	local height = vim.api.nvim_get_option("lines")
 
 	-- calculate our floating window size
-	local win_height = math.ceil(height * 0.5 - 4)
-	local win_width = math.ceil(width * 0.5)
+	local win_height = math.ceil(height * config.options.height - 4)
+	local win_width = math.ceil(width * config.options.width)
 
 	-- and its starting position
 	local row = math.ceil((height - win_height) / 2 - 1)
