@@ -1,7 +1,7 @@
 local M = {}
 
 local defaults = {
-	mnt_base_dir = vim.fn.expand("$HOME") .. "/Desktop",
+	mnt_base_dir = vim.fn.expand("$HOME") .. "/mnt",
 	width = 0.6,
 	height = 0.5,
 }

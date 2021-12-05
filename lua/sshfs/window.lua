@@ -31,6 +31,8 @@ M.set_content = function(buf, top_offset, content)
 	vim.api.nvim_buf_set_option(buf, "modifiable", false)
 end
 
+-- TODO: add keybinding legend
+-- TODO: Add colorscheme
 M.open_window = function()
 	-- get dimensions
 	local width = vim.api.nvim_get_option("columns")
@@ -93,6 +95,7 @@ M.set_mappings = function(buf)
 		k = "move_cursor(1)",
 		l = "move_cursor(1)",
 		q = "close_window()",
+		d = "disconnect()",
 	}
 
 	for k, v in pairs(mappings) do

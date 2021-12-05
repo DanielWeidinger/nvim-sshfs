@@ -2,6 +2,28 @@ local config = require("sshfs.config")
 
 local M = {}
 
+M.commands = {
+	getAllHosts = "cat $HOME/.ssh/config",
+	getAllConnections = "mount -t fuse.sshfs",
+	unmountFolder = function(path)
+		return "fusermount -u " .. path
+	end,
+	mountHost = function(host, mnt_dir, dflt_path, exploration_only)
+		dflt_path = dflt_path or "/" --optinal arg
+		exploration_only = exploration_only or false
+		local allow_other = (not exploration_only and " -o allow_other " or "")
+		local password_stdin = " -o password_stdin "
+		local ssh_cmd = " -o ssh_command='ssh -o StrictHostKeyChecking=accept-new' "
+
+		-- if type(host) ~= "string" then
+		-- 	host = host.user .. "@" .. host.hostname
+		-- end
+		local cmd = "sshfs " .. host .. ":" .. dflt_path .. " " .. mnt_dir .. allow_other .. password_stdin .. ssh_cmd
+
+		return cmd
+	end,
+}
+
 M.parse_config = function(config_lines, connections)
 	local hostPattern = "Host%s+([%w%.-_]+)"
 	local hostNamePattern = "Host[Nn]ame%s+([%w%.-_]+)"
@@ -74,6 +96,7 @@ end
 
 M.formatted_lines = function(entries, win)
 	-- TODO: baseline hostnames for windows
+	-- TODO: Add connection indication heading
 	local width = vim.api.nvim_win_get_width(win)
 	local str_entries = vim.fn.map(entries, function(i, e)
 		local base = "[" .. i .. "] " .. e.host .. ": " .. e.user .. "@" .. e.hostname .. " --> " .. e.mnt_path
@@ -84,17 +107,6 @@ M.formatted_lines = function(entries, win)
 	end)
 
 	return str_entries
-end
-
-M.construct_sshfs_cmd = function(host, mnt_dir, dflt_path, exploration_only)
-	dflt_path = dflt_path or "/" --optinal arg
-	exploration_only = exploration_only or false
-	local allow_other = (not exploration_only and " -o allow_other " or "")
-	local password_stdin = " -o password_stdin "
-	local ssh_cmd = " -o ssh_command='ssh -o StrictHostKeyChecking=accept-new' "
-	-- local cmd = "sudo -S sshfs -o password_stdin "..allow_other..user.."@"..hostname..":"..dflt_path.." "..base_dir
-	local cmd = "sshfs " .. host .. ":" .. dflt_path .. " " .. mnt_dir .. allow_other .. password_stdin .. ssh_cmd
-	return cmd
 end
 
 return M

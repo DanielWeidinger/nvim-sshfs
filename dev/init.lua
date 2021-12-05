@@ -4,6 +4,7 @@ package.loaded["sshfs"] = nil
 package.loaded["sshfs.window"] = nil
 package.loaded["sshfs.utils"] = nil
 package.loaded["sshfs.config"] = nil
+package.loaded["sshfs.connections"] = nil
 
 -- [ , + r ] keymap to reload the lua file
 -- NOTE: someone need to source this file to apply these configurations. So, the
