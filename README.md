@@ -1,5 +1,5 @@
 # nvim sshfs
-A wrapper around sshfs for fast exploration and editing on remote systems.
+A wrapper around sshfs for fast remote exploration and editing.
 
 
 ![Project Preview](preview.png)
@@ -7,7 +7,7 @@ A wrapper around sshfs for fast exploration and editing on remote systems.
 ## Features
 - [x] fast connections to a remote host from within nvim
 - [x] ~/.ssh/config support
-- [x] check connection status of existing mounts
+- [x] check the connection status of existing mounts
 - [x] disconnect from mounts
 - [x] (re-)Connect to existing mounts
 - [x] NERDTree integration
@@ -29,7 +29,7 @@ VimPlug:
 Plug 'DanielWeidinger/nvim-sshfs'
 ```
 In order for this PlugIn to work you have to enable the "user_allow_other" option in your ``/etc/fuse.conf`` file.
-This options allows for changes to be made to the files without starting sshfs as root
+This allows for changes to be made to the files without starting sshfs as root
 ```
 # /etc/fuse.conf - Configuration file for Filesystem in Userspace (FUSE)
 
