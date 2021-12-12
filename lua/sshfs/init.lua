@@ -31,7 +31,10 @@ M.open_host = function()
 end
 
 M.open_hosts = function()
-	local buf, _win = windows.open_window()
+	local dims = windows.get_dimensions()
+	local legend_content = utils.generate_legend(windows.mappings, dims.win_width)
+
+	local buf, _win = windows.open_window(legend_content, dims)
 	win = _win
 
 	local hosts = vim.fn.systemlist(utils.commands.getAllHosts)
@@ -41,10 +44,12 @@ M.open_hosts = function()
 	hosts_map = utils.parse_config(hosts, connections_map)
 	host_count = vim.fn.len(hosts_map)
 
+	local host_content = utils.formatted_lines(hosts_map)
+
 	vim.api.nvim_buf_set_option(buf, "modifiable", false)
 	windows.set_header(buf, "Hosts")
-	windows.set_content(buf, top_offset, utils.formatted_lines(hosts_map))
-	vim.api.nvim_win_set_cursor(win, { 4, 1 })
+	windows.set_content(buf, top_offset, host_content)
+	vim.api.nvim_win_set_cursor(win, { top_offset, 1 })
 	windows.set_mappings(buf)
 end
 

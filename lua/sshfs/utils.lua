@@ -109,4 +109,57 @@ M.formatted_lines = function(entries, win)
 	return str_entries
 end
 
+M.generate_legend = function(mappings, width)
+	local fn_name_pattern = "^([%w%.-_]+)%(.+"
+
+	local fn_set = {}
+	for key, value in pairs(mappings) do
+		local fn_name = value:match(fn_name_pattern)
+
+		if fn_name then
+			fn_name = fn_name:gsub("_", " ")
+			if fn_set[fn_name] ~= nil then
+				fn_set[fn_name] = fn_set[fn_name] .. ", " .. key
+			else
+				fn_set[fn_name] = key
+			end
+		end
+	end
+
+	local result = {}
+	local idx = 1
+	local line = ""
+	for key, value in pairs(fn_set) do
+		local appenix = key .. " -> " .. value
+		local new_line_len = string.len(appenix) + string.len(line)
+		if new_line_len >= (width - 3) then
+			result[idx] = line
+			idx = idx + 1
+			line = appenix
+		else
+			line = line .. ((line ~= "") and " | " or "") .. appenix
+		end
+	end
+	result[idx] = line
+	result[idx + 1] = ""
+
+	return result
+end
+
+M.concat_lines = function(t1, t2)
+	local result = {}
+	local idx = 0
+	local add_fn = function(t)
+		for _, value in pairs(t) do
+			table.insert(result, value)
+			idx = idx + 1
+		end
+	end
+
+	add_fn(t1)
+	add_fn(t2)
+
+	return result
+end
+
 return M
