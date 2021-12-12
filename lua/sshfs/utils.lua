@@ -101,7 +101,7 @@ M.formatted_lines = function(entries, win)
 	local str_entries = vim.fn.map(entries, function(i, e)
 		local base = "[" .. i .. "] " .. e.host .. ": " .. e.user .. "@" .. e.hostname .. " --> " .. e.mnt_path
 		local len = vim.fn.len(base)
-		local connected_string = " [" .. (e.connected and "x" or " ") .. "]"
+		local connected_string = " [" .. (e.connected and config.options.connection_icon or " ") .. "]"
 		local appendix = string.format("%-" .. (width - len - 4) .. "s", "")
 		return base .. appendix .. connected_string
 	end)
