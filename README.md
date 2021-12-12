@@ -15,7 +15,7 @@ A wrapper around sshfs for fast remote exploration and editing.
 ## Usage
 **Commands**
  * :SSHFSOpenHosts 
- * :SSHFSOpenQuickConnect 
+ * :SSHFSOpenQuickConnect (Experimental)
 
 ### Keybindings for host window
  * q: close hosts window
@@ -35,7 +35,7 @@ This allows for changes to be made to the files without starting sshfs as root
 
 # Set the maximum number of FUSE mounts allowed to non-root users.
 # The default is 1000.
-#mount_max = 1000
+# mount_max = 1000
 
 # Allow non-root users to specify the allow_other or allow_root mount options.
 user_allow_other <-- Add this line
@@ -47,6 +47,7 @@ require("sshfs").setup {
 	mnt_base_dir = vim.fn.expand("$HOME") .. "/mnt",
 	width = 0.6, -- host window width
 	height = 0.5, -- host window height
+	connection_icon = "✓", -- icon for connection indication
 }
 ```
 
