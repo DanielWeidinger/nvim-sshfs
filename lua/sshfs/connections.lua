@@ -14,8 +14,13 @@ M.connect_to_host = function(host)
 				return
 			end
 		end
-		local cmd = utils.commands.mountHost(host["host"] or host, host.mnt_path)
-		local passwd = vim.fn.input("Password for " .. host["host"] .. ": \n")
+
+		local passwd = vim.fn.input("Password for " .. host["host"] .. "(<cr> for ssh-key auth): \n")
+		local cmdParams = { host = (host["host"] or host), mnt_dir = host.mnt_path }
+		if passwd == "" then
+			cmdParams.key_auth = true
+		end
+		local cmd = utils.commands.mountHost(cmdParams)
 		print("")
 
 		local res = vim.fn.system(cmd, passwd)

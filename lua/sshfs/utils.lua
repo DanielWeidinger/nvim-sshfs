@@ -8,17 +8,27 @@ M.commands = {
 	unmountFolder = function(path)
 		return "fusermount -u " .. path
 	end,
-	mountHost = function(host, mnt_dir, dflt_path, exploration_only)
-		dflt_path = dflt_path or "/" --optinal arg
-		exploration_only = exploration_only or false
-		local allow_other = (not exploration_only and " -o allow_other " or "")
-		local password_stdin = " -o password_stdin "
+	mountHost = function(params)
+		params.dflt_path = params.dflt_path or "/" --optinal arg
+		params.exploration_only = params.exploration_only or false
+		params.key_auth = params.key_auth or false
+
+		local allow_other = (not params.exploration_only and " -o allow_other " or "")
+		local password_stdin = (params.key_auth and "" or " -o password_stdin ")
 		local ssh_cmd = " -o ssh_command='ssh -o StrictHostKeyChecking=accept-new' "
 
 		-- if type(host) ~= "string" then
 		-- 	host = host.user .. "@" .. host.hostname
 		-- end
-		local cmd = "sshfs " .. host .. ":" .. dflt_path .. " " .. mnt_dir .. allow_other .. password_stdin .. ssh_cmd
+		local cmd = "sshfs "
+			.. params.host
+			.. ":"
+			.. params.dflt_path
+			.. " "
+			.. params.mnt_dir
+			.. allow_other
+			.. password_stdin
+			.. ssh_cmd
 
 		return cmd
 	end,
