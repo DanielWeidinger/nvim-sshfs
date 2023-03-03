@@ -107,12 +107,12 @@ end
 M.formatted_lines = function(entries, win)
 	-- TODO: baseline hostnames for windows
 	-- TODO: Add connection indication heading
-	local width = vim.api.nvim_win_get_width(win)
+	local width = vim.api.nvim_win_get_width(win or 0)
 	local str_entries = vim.fn.map(entries, function(i, e)
 		local base = "[" .. i .. "] " .. e.host .. ": " .. e.user .. "@" .. e.hostname .. " --> " .. e.mnt_path
 		local len = vim.fn.len(base)
 		local connected_string = " [" .. (e.connected and config.options.connection_icon or " ") .. "]"
-		local appendix = string.format("%-" .. (width - len - 4) .. "s", "")
+		local appendix = string.rep(" ", width - len - 4)
 		return base .. appendix .. connected_string
 	end)
 
